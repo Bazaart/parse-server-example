@@ -13,6 +13,7 @@ Parse.Cloud.afterDelete("Products", function (request) {
       // The object was deleted from the Parse Cloud.
     },
     error: function (pattern, error) {
+      console.log(error)
       console.log('pattern could not be deleted');
       // The delete failed.
       // error is a Parse.Error with an error code and message.
@@ -32,6 +33,7 @@ Parse.Cloud.afterDelete("Products", function (request) {
       }
     },
     error: function(error) {
+      console.log(error)
       console.log('product was not found in any collection')
     }
   })
