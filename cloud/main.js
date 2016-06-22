@@ -34,8 +34,24 @@ Parse.Cloud.afterDelete("Products", function (request) {
     },
     error: function(error) {
       console.log(error)
-      console.log('product was not found in any collection')
     }
   })
 
+});
+
+Parse.Cloud.afterDelete("Stickers", function (request) {
+  var query = new Parse.Query("StickerPacks");
+  query.equalTo("stickers", request.object);
+  query.find({
+    success: function(results) {
+      console.log('removing sticker from sticker packs')
+      for (var i=0; i < results.length; i++) {
+        results[i].remove("stickers", request.object)
+        results[i].save()
+      }
+    },
+    error: function(error) {
+      console.log(error)
+    }
+  })  
 });
