@@ -55,3 +55,38 @@ Parse.Cloud.afterDelete("Stickers", function (request) {
     }
   })  
 });
+
+Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
+  var attributes = request.object.attributes; 
+  var changedAttributes = new Array(); 
+  for (var attribute in attributes) {
+    if (request.object.dirty(attribute)) {
+      changedAttributes.push(attribute);
+    }
+  }
+  if (changedAttributes.includes("artist")) {
+      var artist = request.object.get("artist");
+      var query = new Parse.Query("StickerPacks");
+      query.include("stickers");
+      query.include("stickers.artist")
+      query.equalTo("objectId", request.object.id);
+      query.find({
+        success: function(results) {
+          var stickers = results[0].get("stickers");
+          for (var i = 0; i < stickers.length; i++) {
+            var Artist = Parse.Object.extend("Artists");
+            var pointer = new Artist();              
+            pointer.id = artist.id;
+            stickers[i].set("artist", pointer)
+            stickers[i].save()
+          }
+          response.success();
+        },
+        error: function(error) {
+          response.error(error);
+        }
+      })
+  } else {
+    response.success();
+  }
+});
