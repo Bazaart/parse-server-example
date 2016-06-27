@@ -105,3 +105,18 @@ Parse.Cloud.beforeSave("Collections", function (request, response) {
     }
   })
 });
+
+Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
+  var query = new Parse.Query("StickerPacks");
+  query.descending("order");
+  query.first({
+    success: function (firstObject) {
+      var order = firstObject.get("order");
+      request.object.set("order", order + 1);
+      response.success();
+    },
+    error: function (error) {
+      response.error(error);
+    }
+  })
+});
