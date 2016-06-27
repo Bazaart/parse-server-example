@@ -92,6 +92,11 @@ Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
 });
 
 Parse.Cloud.beforeSave("Collections", function (request, response) {
+  if (request.object.get("createdAt") !== undefined) {
+    //Existing object
+    response.success();
+  }
+
   var query = new Parse.Query("Collections");
   query.descending("order");
   query.first({
@@ -107,6 +112,11 @@ Parse.Cloud.beforeSave("Collections", function (request, response) {
 });
 
 Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
+  if (request.object.get("createdAt") !== undefined) {
+    //Existing object
+    response.success()
+  }
+  
   var query = new Parse.Query("StickerPacks");
   query.descending("order");
   query.first({
