@@ -28,3 +28,7 @@ node_modules
 
 # Emacs
 *~
+
+# EB stuff
+.elasticbeanstalk
+.ebextensions/app.config
