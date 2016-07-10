@@ -57,6 +57,7 @@ Parse.Cloud.afterDelete("Stickers", function (request) {
 });
 
 Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
+  var existingObject = request.object.get("createdAt") !== undefined
   var attributes = request.object.attributes; 
   var changedAttributes = new Array(); 
   for (var attribute in attributes) {
@@ -64,28 +65,44 @@ Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
       changedAttributes.push(attribute);
     }
   }
-  if (changedAttributes.includes("artist")) {
-      var artist = request.object.get("artist");
-      var query = new Parse.Query("StickerPacks");
-      query.include("stickers");
-      query.include("stickers.artist")
-      query.equalTo("objectId", request.object.id);
-      query.find({
-        success: function(results) {
-          var stickers = results[0].get("stickers");
-          for (var i = 0; i < stickers.length; i++) {
-            var Artist = Parse.Object.extend("Artists");
-            var pointer = new Artist();              
-            pointer.id = artist.id;
-            stickers[i].set("artist", pointer)
-            stickers[i].save()
-          }
-          response.success();
-        },
-        error: function(error) {
-          response.error(error);
+  
+  if (existingObject && changedAttributes.includes("artist")) {
+    //updating existing sticker pack
+    var artist = request.object.get("artist");
+    var query = new Parse.Query("StickerPacks");
+    query.include("stickers");
+    query.include("stickers.artist")
+    query.equalTo("objectId", request.object.id);
+    query.find({
+      success: function(results) {
+        var stickers = results[0].get("stickers");
+        for (var i = 0; i < stickers.length; i++) {
+          var Artist = Parse.Object.extend("Artists");
+          var pointer = new Artist();              
+          pointer.id = artist.id;
+          stickers[i].set("artist", pointer)
+          stickers[i].save()
         }
-      })
+        response.success();
+      },
+      error: function(error) {
+        response.error(error);
+      }
+    })
+  } else if (!existingObject) {
+    //adding new object
+    var query = new Parse.Query("StickerPacks");
+    query.descending("order");
+    query.first({
+      success: function (firstObject) {
+        var order = firstObject.get("order");
+        request.object.set("order", order + 1);
+        response.success();
+      },
+      error: function (error) {
+        response.error(error);
+      }
+    })
   } else {
     response.success();
   }
@@ -98,26 +115,6 @@ Parse.Cloud.beforeSave("Collections", function (request, response) {
   }
 
   var query = new Parse.Query("Collections");
-  query.descending("order");
-  query.first({
-    success: function (firstObject) {
-      var order = firstObject.get("order");
-      request.object.set("order", order + 1);
-      response.success();
-    },
-    error: function (error) {
-      response.error(error);
-    }
-  })
-});
-
-Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
-  if (request.object.get("createdAt") !== undefined) {
-    //Existing object
-    response.success()
-  }
-  
-  var query = new Parse.Query("StickerPacks");
   query.descending("order");
   query.first({
     success: function (firstObject) {
