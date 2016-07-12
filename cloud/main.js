@@ -76,6 +76,12 @@ Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
     query.find({
       success: function(results) {
         var stickers = results[0].get("stickers");
+        if (stickers == undefined) {
+          //no stickers found
+          console.log("No Stickers!");
+          response.success();
+          return
+        }
         for (var i = 0; i < stickers.length; i++) {
           var Artist = Parse.Object.extend("Artists");
           var pointer = new Artist();              
