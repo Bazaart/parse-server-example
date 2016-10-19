@@ -134,6 +134,26 @@ Parse.Cloud.beforeSave("Collections", function (request, response) {
   })
 });
 
+Parse.Cloud.beforeSave("Banners", function (request, response) {
+  if (request.object.get("createdAt") !== undefined) {
+    //Existing object
+    response.success();
+  }
+
+  var query = new Parse.Query("Banners");
+  query.descending("order");
+  query.first({
+    success: function (firstObject) {
+      var order = firstObject.get("order");
+      request.object.set("order", order + 1);
+      response.success();
+    },
+    error: function (error) {
+      response.error(error);
+    }
+  })
+});
+
 Parse.Cloud.beforeSave("Artists", function (request, response) {
   if (request.object.get("createdAt") !== undefined) {
     //Existing object
