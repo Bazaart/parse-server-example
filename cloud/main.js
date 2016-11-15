@@ -3,6 +3,42 @@ Parse.Cloud.define('hello', function(req, res) {
   res.success('Hi');
 });
 
+Parse.Cloud.afterDelete("CartItems", function (request) {
+  
+  // delete product
+  var product = request.object.get("product")
+  product.destroy({
+    success: function (pattern) {
+      console.log('product deleted');
+      // The object was deleted from the Parse Cloud.
+    },
+    error: function (pattern, error) {
+      console.log(error)
+      console.log('product could not be deleted');
+      // The delete failed.
+      // error is a Parse.Error with an error code and message.
+    }
+  });
+
+  // Remove product from all Carts
+
+  var query = new Parse.Query("Carts");
+  query.equalTo("items", request.object);
+  query.find({
+    success: function(results) {
+      console.log('removing cart items from carts')
+      for (var i=0; i < results.length; i++) {
+        results[i].remove("items", request.object)
+        results[i].save()
+      }
+    },
+    error: function(error) {
+      console.log(error)
+    }
+  });
+    
+});
+
 Parse.Cloud.afterDelete("Products", function (request) {
 
   // Delete pattern
