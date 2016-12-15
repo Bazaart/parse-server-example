@@ -13,7 +13,7 @@ Parse.Cloud.afterDelete("CartItems", function (request) {
       // The object was deleted from the Parse Cloud.
     },
     error: function (pattern, error) {
-      console.log(error)
+      console.log(error);
       console.log('product could not be deleted');
       // The delete failed.
       // error is a Parse.Error with an error code and message.
@@ -101,8 +101,10 @@ Parse.Cloud.beforeSave("StickerPacks", function (request, response) {
       changedAttributes.push(attribute);
     }
   }
+
+  var artistIndex = changedAttributes.indexOf("artist");
   
-  if (existingObject && changedAttributes.includes("artist")) {
+  if (existingObject && artistIndex !== -1) {
     //updating existing sticker pack
     var artist = request.object.get("artist");
     var query = new Parse.Query("StickerPacks");
